@@ -60,7 +60,7 @@
 #chat-container {
   position: fixed; bottom: 100px; right: 20px;
   width: 320px; max-height: 500px; background: #fff;
-  border: 1px solid #ddd; border-radius: 10px;
+  border: 1px solid #ddd; border-radius: 12px;
   display: none; flex-direction: column; font-family: sans-serif;
   z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
