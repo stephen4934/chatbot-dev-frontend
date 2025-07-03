@@ -1,7 +1,7 @@
 // Sun City Chatbot Widget — Fully Working with PapaParse CSV + Bubble Fix
 (async function () {
   const config = {
-    avatar: "https://chatbot-frontend-ruby-five.vercel.app/avatar.png",
+    avatar: "https://chatbot-dev-frontend.vercel.app/avatar.png",
     backendUrl: "https://ai-chatbot-backend-lnub.onrender.com",
     brandColor: "#c6b29f",
     tooltip: "Hi there!\nNeed help?",
