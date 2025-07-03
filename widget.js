@@ -1,12 +1,12 @@
-// Serve AI Chatbot Widget (Final with Persistent Quick Replies + Tooltip Logic)
+// Sun City Tanning Chatbot Widget (Dev Version with Serve AI pitch logic)
 (function () {
   const config = {
     avatar: "https://chatbot-frontend-ruby-five.vercel.app/avatar.png",
-    greeting: "Hi! I'm the Serve AI assistant. Ask me anything about how we help small businesses build custom AI chatbots.",
+    greeting: "Hi! I'm the Sun City Tanning assistant. Ask me anything about our services like tanning, red light therapy, or massage.",
     backendUrl: "https://ai-chatbot-backend-lnub.onrender.com",
     brandColor: "#c6b29f",
     tooltip: "Hi there!\nNeed help?",
-    bookingLink: "https://calendly.com/stephen4934"
+    bookingLink: "https://www.suncity-tanning.com/"
   };
 
   // Style injection
@@ -192,7 +192,6 @@
   const inputForm = document.getElementById("input-form");
   const inputField = document.getElementById("input");
 
-  // Tooltip logic: hide after 8s or on click
   setTimeout(() => {
     wrapper.classList.add("hide-tooltip");
   }, 8000);
@@ -233,23 +232,19 @@
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: text,
-          businessName: "Serve AI",
-          personality: "Serve AI builds custom AI chatbot assistants for small businesses. These bots turn complex websites into simple conversations by answering customer questions, helping conversions, and reducing repetitive tasks — all with no subscriptions.",
+          businessName: "Sun City Tanning",
+          personality: "Professional, friendly, and beauty-conscious. Sun City Tanning helps clients feel confident and relaxed through safe tanning, rejuvenating red light therapy, and massage services.",
           greeting: config.greeting,
           services: [
-            "Custom AI chatbot creation",
-            "Website integration via embed or link",
-            "Personalized styling with brand colors and avatar",
-            "Trained on your business info (FAQs, pricing, services)",
-            "Google Form-based intake with file upload",
-            "Zoom walkthrough setup + 30-day support",
-            "Optional backend handoff for self-hosting"
+            "Tanning services: Get a sun-kissed glow with various package options.",
+            "Red Light Therapy: A relaxing light-based treatment that supports skin health and muscle recovery.",
+            "Massage therapy: Enjoy therapeutic massages to help reduce stress and improve wellness."
           ],
           contact: {
-            email: "stephen4934@gmail.com",
-            booking: config.bookingLink
+            phone: "770-967-4972",
+            email: "suncity_moriah@yahoo.com"
           },
-          restrictions: "This chatbot only answers questions about Serve AI and its services. It will not answer unrelated general questions or provide external info."
+          restrictions: "This chatbot only answers questions about Sun City Tanning's offerings, services, hours, and general info. It does not answer questions unrelated to the business."
         }),
       });
       const data = await res.json();
@@ -262,7 +257,24 @@
   inputForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const text = inputField.value.trim();
-    if (text) sendMessage(text);
+    if (!text) return;
+
+    const selfSellTriggers = [
+      "who built you",
+      "who made you",
+      "who created you",
+      "what company built you",
+      "are you an ai",
+      "are you a chatbot"
+    ];
+
+    if (selfSellTriggers.some(trigger => text.toLowerCase().includes(trigger))) {
+      addMessage("I’m a custom AI assistant built by Serve AI to help businesses like this grow. Want one for your business? 👉 https://calendly.com/stephen4934", "bot");
+      inputField.value = "";
+      return;
+    }
+
+    sendMessage(text);
   });
 
   // Initial greeting and persistent quick replies
@@ -275,8 +287,8 @@
 
   const quickReplies = [
     "What services do you offer?",
-    "How do I book a demo?",
-    "How much does it cost?"
+    "How does red light therapy work?",
+    "Do I need an appointment?"
   ];
 
   quickReplies.forEach(text => {
