@@ -1,0 +1,291 @@
+// Serve AI Chatbot Widget (Final with Persistent Quick Replies + Tooltip Logic)
+(function () {
+  const config = {
+    avatar: "https://chatbot-frontend-ruby-five.vercel.app/avatar.png",
+    greeting: "Hi! I'm the Serve AI assistant. Ask me anything about how we help small businesses build custom AI chatbots.",
+    backendUrl: "https://ai-chatbot-backend-lnub.onrender.com",
+    brandColor: "#c6b29f",
+    tooltip: "Hi there!\nNeed help?",
+    bookingLink: "https://calendly.com/stephen4934"
+  };
+
+  // Style injection
+  const style = document.createElement("style");
+  style.innerHTML = `
+    #chat-toggle-wrapper {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+    }
+    #chat-tooltip {
+      background: #333;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      white-space: pre-line;
+      position: absolute;
+      right: 60px;
+      bottom: 12px;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    #chat-toggle-wrapper.hide-tooltip #chat-tooltip {
+      opacity: 0;
+    }
+    #chat-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+    #chat-toggle img {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    #chat-container {
+      position: fixed;
+      bottom: 100px;
+      right: 24px;
+      width: 360px;
+      max-height: 90vh;
+      display: none;
+      flex-direction: column;
+      background: #fffdfb;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      z-index: 9998;
+      overflow: hidden;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 400px;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      display: flex;
+      align-items: flex-start;
+      font-size: 15px;
+      line-height: 1.4;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen;
+    }
+    .message.user {
+      align-self: flex-end;
+      background-color: #f3ebe4;
+      color: #333;
+      padding: 10px 14px;
+      border-radius: 16px 16px 4px 16px;
+      font-weight: 500;
+      max-width: 85%;
+    }
+    .message.bot {
+      align-self: flex-start;
+      display: flex;
+      max-width: 85%;
+    }
+    .bot-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 10px;
+      flex-shrink: 0;
+    }
+    .bot-bubble {
+      background-color: #f7f4f0;
+      color: #111;
+      padding: 10px 14px;
+      border-radius: 16px 16px 16px 4px;
+      font-weight: 500;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    #input-form {
+      display: flex;
+      border-top: 1px solid #eee;
+    }
+    #input {
+      flex: 1;
+      border: none;
+      padding: 14px;
+      font-size: 15px;
+      outline: none;
+      background: #fffaf7;
+    }
+    #send {
+      background: ${config.brandColor};
+      color: white;
+      border: none;
+      padding: 0 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #send:hover {
+      background: #b29f8a;
+    }
+
+    .quick-reply {
+      background: #eee;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 14px;
+      margin: 4px 6px 0 0;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .quick-reply:hover {
+      background: #ddd;
+    }
+
+    .booking-button {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 14px;
+      background: ${config.brandColor};
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Bubble and tooltip
+  const wrapper = document.createElement("div");
+  wrapper.id = "chat-toggle-wrapper";
+  wrapper.innerHTML = `
+    <div id="chat-tooltip">${config.tooltip}</div>
+    <div id="chat-toggle" title="Chat with our AI Assistant!">
+      <img src="${config.avatar}" alt="Chatbot Icon" />
+    </div>
+  `;
+  document.body.appendChild(wrapper);
+
+  const chat = document.createElement("div");
+  chat.id = "chat-container";
+  chat.innerHTML = `
+    <div id="messages" class="messages"></div>
+    <form id="input-form">
+      <input type="text" id="input" placeholder="Ask me anything..." autocomplete="off" />
+      <button id="send" type="submit">Send</button>
+    </form>
+  `;
+  document.body.appendChild(chat);
+
+  const toggle = document.getElementById("chat-toggle");
+  const tooltip = document.getElementById("chat-tooltip");
+  const container = document.getElementById("chat-container");
+  const messages = document.getElementById("messages");
+  const inputForm = document.getElementById("input-form");
+  const inputField = document.getElementById("input");
+
+  // Tooltip logic: hide after 8s or on click
+  setTimeout(() => {
+    wrapper.classList.add("hide-tooltip");
+  }, 8000);
+  toggle.addEventListener("click", () => {
+    wrapper.classList.add("hide-tooltip");
+    container.style.display = container.style.display === "flex" ? "none" : "flex";
+  });
+
+  function addMessage(text, sender) {
+    const msg = document.createElement("div");
+    msg.className = "message " + sender;
+    if (sender === "bot") {
+      msg.innerHTML = `
+        <img src="${config.avatar}" class="bot-avatar" />
+        <div class="bot-bubble">${text}</div>
+      `;
+      if (text.toLowerCase().includes("book") || text.toLowerCase().includes("meeting")) {
+        const button = document.createElement("a");
+        button.href = config.bookingLink;
+        button.target = "_blank";
+        button.className = "booking-button";
+        button.innerText = "Set up a Meeting";
+        msg.querySelector(".bot-bubble").appendChild(button);
+      }
+    } else {
+      msg.textContent = text;
+    }
+    messages.appendChild(msg);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  async function sendMessage(text) {
+    addMessage(text, "user");
+    inputField.value = "";
+    try {
+      const res = await fetch(config.backendUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: text,
+          businessName: "Serve AI",
+          personality: "Serve AI builds custom AI chatbot assistants for small businesses. These bots turn complex websites into simple conversations by answering customer questions, helping conversions, and reducing repetitive tasks — all with no subscriptions.",
+          greeting: config.greeting,
+          services: [
+            "Custom AI chatbot creation",
+            "Website integration via embed or link",
+            "Personalized styling with brand colors and avatar",
+            "Trained on your business info (FAQs, pricing, services)",
+            "Google Form-based intake with file upload",
+            "Zoom walkthrough setup + 30-day support",
+            "Optional backend handoff for self-hosting"
+          ],
+          contact: {
+            email: "stephen4934@gmail.com",
+            booking: config.bookingLink
+          },
+          restrictions: "This chatbot only answers questions about Serve AI and its services. It will not answer unrelated general questions or provide external info."
+        }),
+      });
+      const data = await res.json();
+      addMessage(data.reply, "bot");
+    } catch (err) {
+      addMessage("Sorry, something went wrong.", "bot");
+    }
+  }
+
+  inputForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = inputField.value.trim();
+    if (text) sendMessage(text);
+  });
+
+  // Initial greeting and persistent quick replies
+  addMessage(config.greeting, "bot");
+
+  const replyContainer = document.createElement("div");
+  replyContainer.style.margin = "10px 20px";
+  replyContainer.style.display = "flex";
+  replyContainer.style.flexWrap = "wrap";
+
+  const quickReplies = [
+    "What services do you offer?",
+    "How do I book a demo?",
+    "How much does it cost?"
+  ];
+
+  quickReplies.forEach(text => {
+    const btn = document.createElement("button");
+    btn.innerText = text;
+    btn.className = "quick-reply";
+    btn.onclick = () => sendMessage(text);
+    replyContainer.appendChild(btn);
+  });
+
+  messages.appendChild(replyContainer);
+})();
