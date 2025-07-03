@@ -1,4 +1,4 @@
-// Sun City Chatbot Widget — Final Version with Google Sheet Config + Self-Sell Logic
+// Sun City Chatbot Widget — Final Version with Google Sheet Config + Self-Sell Fix
 (async function () {
   const config = {
     avatar: "https://chatbot-frontend-ruby-five.vercel.app/avatar.png",
@@ -34,9 +34,9 @@
     }
   }
 
-  await loadConfigFromSheet();
+  await loadConfigFromSheet(); // ✅ Wait until config is loaded
+  addMessage(config.greeting, "bot"); // ✅ Now it's safe to show the greeting
 
-  // Inject styles
   const style = document.createElement("style");
   style.innerHTML = `
     #chat-toggle-wrapper { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
@@ -61,7 +61,7 @@
   `;
   document.head.appendChild(style);
 
-  // Create chat UI
+  // Full HTML structure
   const wrapper = document.createElement("div");
   wrapper.id = "chat-toggle-wrapper";
   wrapper.innerHTML = `
@@ -165,8 +165,6 @@
 
     sendMessage(text);
   });
-
-  addMessage(config.greeting, "bot");
 
   const replyContainer = document.createElement("div");
   replyContainer.style.margin = "10px 20px";
