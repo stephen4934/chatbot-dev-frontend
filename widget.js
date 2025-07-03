@@ -1,4 +1,4 @@
-// Sun City Chatbot Widget — Polished Final Version with Layout + Style Fixes
+// Sun City Chatbot Widget — Final Demo-Ready Layout (Scroll, Style, Start Closed)
 (async function () {
   const config = {
     avatar: "https://chatbot-dev-frontend.vercel.app/avatar.png",
@@ -35,6 +35,7 @@
       console.warn("Failed to load Google Sheet config:", err);
     }
 
+    // Styles
     const style = document.createElement("style");
     style.innerHTML = `
 #chat-toggle-wrapper {
@@ -58,13 +59,13 @@
 }
 #chat-container {
   position: fixed; bottom: 100px; right: 20px;
-  width: 340px; max-height: 520px; display: none;
-  background: white; border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-  display: flex; flex-direction: column; overflow: hidden;
-  font-family: 'Helvetica Neue', sans-serif; z-index: 9999;
+  width: 320px; max-height: 500px; background: #fff;
+  border: 1px solid #ddd; border-radius: 10px;
+  display: none; flex-direction: column; font-family: sans-serif;
+  z-index: 9999; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
 }
 #messages {
-  flex: 1; padding: 12px; overflow-y: auto;
+  flex: 1; padding: 10px; overflow-y: auto; max-height: 400px;
 }
 .message {
   margin: 10px 0;
@@ -123,6 +124,7 @@
     `;
     document.head.appendChild(style);
 
+    // HTML
     const wrapper = document.createElement("div");
     wrapper.id = "chat-toggle-wrapper";
     wrapper.innerHTML = `
@@ -144,6 +146,7 @@
     `;
     document.body.appendChild(chat);
 
+    // Toggle behavior
     const toggle = document.getElementById("chat-toggle");
     const tooltip = document.getElementById("chat-tooltip");
     const container = document.getElementById("chat-container");
@@ -155,6 +158,7 @@
     toggle.addEventListener("click", () => {
       wrapper.classList.add("hide-tooltip");
       container.style.display = container.style.display === "flex" ? "none" : "flex";
+      container.style.flexDirection = "column";
     });
 
     function addMessage(text, sender) {
@@ -242,6 +246,7 @@
       sendMessage(text);
     });
 
+    // Quick replies
     const replyContainer = document.createElement("div");
     replyContainer.style.margin = "10px 20px";
     replyContainer.style.display = "flex";
@@ -264,5 +269,6 @@
     messages.appendChild(replyContainer);
     addMessage(config.greeting, "bot");
   };
+
   document.head.appendChild(papaScript);
 })();
