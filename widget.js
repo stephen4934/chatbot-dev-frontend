@@ -1,4 +1,4 @@
-// Sun City Chatbot Widget — Fully Fixed with PapaParse CSV Handling
+// Sun City Chatbot Widget — Fully Working with PapaParse CSV + Bubble Fix
 (async function () {
   const config = {
     avatar: "https://chatbot-frontend-ruby-five.vercel.app/avatar.png",
@@ -34,15 +34,142 @@
     }
   }
 
-  // Load PapaParse script dynamically
   const papaScript = document.createElement("script");
   papaScript.src = "https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js";
   papaScript.onload = async () => {
     await loadConfigFromSheet();
 
-    // Insert styles
     const style = document.createElement("style");
-    style.innerHTML = `/* styles remain unchanged */`;
+    style.innerHTML = `
+#chat-toggle-wrapper {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9998;
+}
+#chat-tooltip {
+  background: #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 6px;
+  white-space: pre-line;
+  transition: opacity 0.3s ease;
+}
+#chat-toggle-wrapper.hide-tooltip #chat-tooltip {
+  opacity: 0;
+  pointer-events: none;
+}
+#chat-toggle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: ${config.brandColor};
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+#chat-toggle img {
+  width: 70%;
+  height: 70%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+#chat-container {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  width: 320px;
+  max-height: 500px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  display: none;
+  flex-direction: column;
+  font-family: sans-serif;
+  z-index: 9999;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+#messages {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+.message {
+  margin: 10px 0;
+}
+.message.user {
+  text-align: right;
+  color: #555;
+}
+.message.bot {
+  display: flex;
+  align-items: flex-start;
+}
+.bot-avatar {
+  width: 36px;
+  height: 36px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+.bot-bubble {
+  background: #f4f4f4;
+  padding: 10px 14px;
+  border-radius: 14px;
+  max-width: 220px;
+  font-size: 14px;
+}
+.booking-button {
+  display: inline-block;
+  margin-top: 8px;
+  background: ${config.brandColor};
+  color: white;
+  padding: 6px 12px;
+  text-decoration: none;
+  border-radius: 6px;
+  font-size: 13px;
+}
+#input-form {
+  display: flex;
+  border-top: 1px solid #ddd;
+}
+#input {
+  flex: 1;
+  border: none;
+  padding: 10px;
+  font-size: 14px;
+}
+#send {
+  background: ${config.brandColor};
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.quick-reply {
+  margin: 4px 4px 0 0;
+  padding: 6px 12px;
+  background: #eee;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 13px;
+}
+@media (max-width: 480px) {
+  #chat-container {
+    width: 90%;
+    right: 5%;
+    bottom: 100px;
+  }
+}
+    `;
     document.head.appendChild(style);
 
     const wrapper = document.createElement("div");
@@ -174,4 +301,3 @@
 
   document.head.appendChild(papaScript);
 })();
-
