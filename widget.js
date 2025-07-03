@@ -1,3 +1,4 @@
+// Sun City Chatbot Widget — Final Version with Google Sheet Config + Self-Sell Logic
 (async function () {
   const config = {
     avatar: "https://chatbot-frontend-ruby-five.vercel.app/avatar.png",
@@ -21,17 +22,13 @@
       const text = await res.text();
       const rows = text.split("\n").map(r => r.split(","));
       const conf = Object.fromEntries(rows.slice(1).map(([k, v]) => [k.trim(), v.trim()]));
-
       config.greeting = conf.greeting;
       config.bookingLink = conf.bookingLink;
       config.services = conf.services.split(";").map(s => s.trim());
       config.businessName = conf.businessName;
       config.personality = conf.personality;
       config.restrictions = conf.restrictions;
-      config.contact = {
-        phone: conf.phone,
-        email: conf.email
-      };
+      config.contact = { phone: conf.phone, email: conf.email };
     } catch (err) {
       console.warn("Failed to load Google Sheet config:", err);
     }
@@ -39,13 +36,32 @@
 
   await loadConfigFromSheet();
 
+  // Inject styles
   const style = document.createElement("style");
   style.innerHTML = `
-    /* styles omitted for brevity — same as yours */
-    /* Keep using your existing style block */
+    #chat-toggle-wrapper { position: fixed; bottom: 24px; right: 24px; z-index: 9999; }
+    #chat-tooltip { background: #333; color: white; padding: 6px 10px; border-radius: 6px; font-size: 13px; white-space: pre-line; position: absolute; right: 60px; bottom: 12px; opacity: 1; transition: opacity 0.3s ease; pointer-events: none; }
+    #chat-toggle-wrapper.hide-tooltip #chat-tooltip { opacity: 0; }
+    #chat-toggle { background: none; border: none; cursor: pointer; }
+    #chat-toggle img { width: 56px; height: 56px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); }
+    #chat-container { position: fixed; bottom: 100px; right: 24px; width: 360px; max-height: 90vh; display: none; flex-direction: column; background: #fffdfb; border-radius: 16px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15); z-index: 9998; overflow: hidden; }
+    .messages { flex: 1; padding: 20px; overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column; gap: 16px; max-height: 400px; scroll-behavior: smooth; }
+    .message { display: flex; align-items: flex-start; font-size: 15px; line-height: 1.4; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen; }
+    .message.user { align-self: flex-end; background-color: #f3ebe4; color: #333; padding: 10px 14px; border-radius: 16px 16px 4px 16px; font-weight: 500; max-width: 85%; }
+    .message.bot { align-self: flex-start; display: flex; max-width: 85%; }
+    .bot-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; margin-right: 10px; flex-shrink: 0; }
+    .bot-bubble { background-color: #f7f4f0; color: #111; padding: 10px 14px; border-radius: 16px 16px 16px 4px; font-weight: 500; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    #input-form { display: flex; border-top: 1px solid #eee; }
+    #input { flex: 1; border: none; padding: 14px; font-size: 15px; outline: none; background: #fffaf7; }
+    #send { background: ${config.brandColor}; color: white; border: none; padding: 0 20px; font-weight: bold; cursor: pointer; }
+    #send:hover { background: #b29f8a; }
+    .quick-reply { background: #eee; border: none; border-radius: 20px; padding: 8px 14px; margin: 4px 6px 0 0; cursor: pointer; font-size: 14px; }
+    .quick-reply:hover { background: #ddd; }
+    .booking-button { display: inline-block; margin-top: 10px; padding: 8px 14px; background: ${config.brandColor}; color: white; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px; }
   `;
   document.head.appendChild(style);
 
+  // Create chat UI
   const wrapper = document.createElement("div");
   wrapper.id = "chat-toggle-wrapper";
   wrapper.innerHTML = `
