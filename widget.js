@@ -2,7 +2,7 @@
 (async function () {
   const config = {
     avatar: "https://chatbot-dev-frontend.vercel.app/avatar.png",
-    backendUrl: "https://ai-chatbot-backend-lnub.onrender.com",
+    backendUrl: "https://serveai-backend-dev.onrender.com",
     brandColor: "#c6b29f",
     tooltip: "Hi there!\nNeed help?",
     bookingLink: "",
